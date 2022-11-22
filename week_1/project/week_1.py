@@ -41,21 +41,30 @@ def csv_helper(file_name: str) -> Iterator[Stock]:
             yield Stock.from_list(row)
 
 
-@op
-def get_s3_data():
-    pass
+@op(config_schema={"s3_key": String}, out={"StockList": Out(dagster_type=List[Stock],
+                                            description="List of stocks from csv file. ")})
+def get_s3_data(context) -> List[Stock]:
+    s3_key = context.op_config['s3_key']
+    return list(csv_helper(s3_key))
 
 
-@op
-def process_data():
-    pass
+@op(ins={"StockList": In(dagster_type=List[Stock], description="List of stocks from data source")})
+def process_data(context, StockList: List[Stock]) -> Aggregation:
+    highest = Aggregation(date=datetime.now(),high=0)
+    for item in StockList:
+        if item.high > highest.high:
+            highest = Aggregation(date=item.date,high=item.high)
+    return highest
 
 
-@op
-def put_redis_data():
-    pass
+@op(ins={"stock": In(dagster_type=Aggregation, description="The stock item with the highest value.")})
+def put_redis_data(context, stock: Aggregation)-> Nothing:
+    print("Writing the Highest Stock Level")
+    print(stock)
 
 
 @job
 def week_1_pipeline():
-    pass
+    stockList = get_s3_data()
+    highestStock = process_data(stockList)
+    put_redis_data(highestStock)

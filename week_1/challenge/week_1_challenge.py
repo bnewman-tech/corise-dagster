@@ -8,6 +8,7 @@ from dagster import (
     Any,
     DynamicOut,
     DynamicOutput,
+    Int,
     In,
     Nothing,
     Out,
@@ -55,19 +56,30 @@ def csv_helper(file_name: str) -> Iterator[Stock]:
             yield Stock.from_list(row)
 
 
-@op
-def get_s3_data():
-    pass
+@op(config_schema={"s3_key": String}, out={"stockList": Out(is_required=False,dagster_type=List[Stock]),
+                                           "empty_stocks": Out(is_required=False,dagster_type=Any)})
+def get_s3_data(context) -> List[Stock]:
+    s3_key = context.op_config['s3_key']
+    stockList =  list(csv_helper(s3_key))
+    if len(stockList) == 0:
+        yield Output(None, "empty_stocks")
+    else:
+        yield Output(stockList, "stockList")
 
 
-@op
-def process_data():
-    pass
+@op(ins={"StockList": In(dagster_type=List[Stock], description="List of stocks from data source")},
+    config_schema={"nlargest": Int}, out=DynamicOut())
+def process_data(context, StockList: List[Stock]) -> Aggregation:
+    nlargest = context.op_config["nlargest"]
+    StockList.sort(key=lambda x : x.high,reverse=True)
+    for stock in StockList[0:nlargest]:
+        print(stock)
+        yield DynamicOutput(Aggregation(date=stock.date, high=stock.high), mapping_key=str(int(stock.high)))
 
-
-@op
-def put_redis_data():
-    pass
+@op(ins={"stock": In(dagster_type=Aggregation, description="The stock item with the highest value.")})
+def put_redis_data(context, stock: Aggregation)-> Nothing:
+    print("Writing the Highest Stock Level")
+    print(stock)
 
 
 @op(
@@ -80,4 +92,7 @@ def empty_stock_notify(context, empty_stocks) -> Nothing:
 
 @job
 def week_1_challenge():
-    pass
+    stockList, empty_stocks = get_s3_data()
+    empty_stock_notify(empty_stocks)
+    highestStock = process_data(stockList)
+    highestStock.map(put_redis_data)
