@@ -1,23 +1,9 @@
-from typing import List
-
 from dagster import (
-    In,
-    Nothing,
-    Out,
-    ResourceDefinition,
-    RetryPolicy,
-    RunRequest,
-    ScheduleDefinition,
-    SkipReason,
     graph,
     op,
     schedule,
     sensor,
-    static_partitioned_config,
 )
-from workspaces.project.sensors import get_s3_keys
-from workspaces.resources import mock_s3_resource, redis_resource, s3_resource
-from workspaces.types import Aggregation, Stock
 
 
 @op

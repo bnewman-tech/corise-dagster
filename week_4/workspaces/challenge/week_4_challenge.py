@@ -1,8 +1,6 @@
 from random import randint
 
-from dagster import AssetIn, asset
-from dagster_dbt import load_assets_from_dbt_project
-from workspaces.dbt_config import DBT_PROJECT_PATH
+from dagster import asset
 
 SOURCE_TABLE = "analytics.dbt_table"
 

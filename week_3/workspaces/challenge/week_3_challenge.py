@@ -1,5 +1,4 @@
-from dagster import In, IOManager, Nothing, Out, String, graph, io_manager, op
-from workspaces.resources import postgres_resource
+from dagster import IOManager, String, graph, io_manager, op
 
 
 class PostgresIOManager(IOManager):

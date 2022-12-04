@@ -1,8 +1,6 @@
 from random import randint
 
-from dagster import In, Nothing, String, graph, op
-from dagster_dbt import dbt_cli_resource, dbt_run_op, dbt_test_op
-from workspaces.resources import postgres_resource
+from dagster import In, String, graph, op
 
 DBT_PROJECT_PATH = "/opt/dagster/dagster_home/dbt_test_project/."
 

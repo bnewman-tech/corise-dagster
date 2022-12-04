@@ -1,8 +1,4 @@
-from typing import List
-
-from dagster import Nothing, String, asset, with_resources
-from workspaces.resources import redis_resource, s3_resource
-from workspaces.types import Aggregation, Stock
+from dagster import asset, with_resources
 
 
 @asset
