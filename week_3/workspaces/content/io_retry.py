@@ -1,6 +1,6 @@
-from random import randint
 
 from dagster import RetryPolicy, String, fs_io_manager, graph, op
+import secrets
 
 
 @op
@@ -10,7 +10,7 @@ def time_consuming_step() -> String:
 
 @op
 def unreliable_step(name: String):
-    if randint(0, 1) == 1:
+    if secrets.SystemRandom().randint(0, 1) == 1:
         raise Exception("Flaky op")
     print(f"Hello, {name}!")
 
