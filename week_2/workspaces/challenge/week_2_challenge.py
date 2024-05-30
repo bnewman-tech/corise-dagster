@@ -1,6 +1,6 @@
-from random import randint
 
 from dagster import In, String, graph, op
+import secrets
 
 DBT_PROJECT_PATH = "/opt/dagster/dagster_home/dbt_test_project/."
 
@@ -28,7 +28,7 @@ def create_dbt_table(context) -> String:
 def insert_dbt_data(context, table_name):
     sql = f"INSERT INTO {table_name} (column_1, column_2, column_3) VALUES ('A', 'B', 'C');"
 
-    number_of_rows = randint(1, 100)
+    number_of_rows = secrets.SystemRandom().randint(1, 100)
     for _ in range(number_of_rows):
         context.resources.database.execute_query(sql)
         context.log.info("Inserted a row")

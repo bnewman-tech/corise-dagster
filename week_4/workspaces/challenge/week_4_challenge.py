@@ -1,6 +1,6 @@
-from random import randint
 
 from dagster import asset
+import secrets
 
 SOURCE_TABLE = "analytics.dbt_table"
 
@@ -23,7 +23,7 @@ def create_dbt_table(context):
 def insert_dbt_data(context, create_dbt_table):
     sql = f"INSERT INTO {SOURCE_TABLE} (column_1, column_2, column_3) VALUES ('A', 'B', 'C');"
 
-    number_of_rows = randint(1, 10)
+    number_of_rows = secrets.SystemRandom().randint(1, 10)
     for _ in range(number_of_rows):
         context.resources.database.execute_query(sql)
         context.log.info("Inserted a row")

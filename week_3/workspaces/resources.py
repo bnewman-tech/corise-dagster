@@ -1,6 +1,5 @@
 import csv
 import json
-from random import randint
 from typing import Iterator
 from unittest.mock import MagicMock
 
@@ -9,6 +8,7 @@ import redis
 import sqlalchemy
 from dagster import Field, Int, String, resource
 from workspaces.types import Aggregation
+import secrets
 
 
 class Postgres:
@@ -64,7 +64,7 @@ class Redis:
 
     def put_data(self, name: str, value: str):
         # Occasional error
-        if randint(0, 1) == 0:
+        if secrets.SystemRandom().randint(0, 1) == 0:
             raise Exception("Injected occasional error")
         self.client.set(name, value)
 

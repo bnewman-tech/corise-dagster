@@ -1,7 +1,7 @@
-from random import randint
 
 from dagster import ResourceDefinition, String, graph, op
 from workspaces.resources import postgres_resource
+import secrets
 
 
 @op(
@@ -23,7 +23,7 @@ def create_table(context) -> String:
 def insert_into_table(context, table_name: String):
     sql = f"INSERT INTO {table_name} (column_1) VALUES (1);"
 
-    number_of_rows = randint(1, 10)
+    number_of_rows = secrets.SystemRandom().randint(1, 10)
     for _ in range(number_of_rows):
         context.resources.database.execute_query(sql)
         context.log.info("Inserted a row")
